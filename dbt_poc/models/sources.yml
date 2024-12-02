@@ -1,0 +1,44 @@
+version: 2
+
+sources:
+  - name: platform_data
+    schema: public
+    tables:
+      - name: events_table
+        description: Raw platform transactions data from daily CSV loads
+        columns:
+          - name: transaction_id
+            description: Unique identifier for each transaction
+            data_tests:
+              - unique
+              - not_null
+          
+          - name: purchase_price
+            description: Final price paid by customer including any fees or adjustments
+
+          - name: product_value
+            description: Base value of the product before any adjustments
+
+          - name: product_name 
+            description: Name/identifier of the product purchased
+          
+          - name: first_name
+            description: Customer's first name
+          
+          - name: last_name
+            description: Customer's last name
+          
+          - name: email
+            description: Customer's email address
+          
+          - name: gender
+            description: Customer's specified gender
+          
+          - name: customer_country
+            description: Country where the customer is located
+          
+          - name: client_country
+            description: Country where the transaction was processed
+          
+          - name: transaction_date
+            description: Date when the transaction was recorded in our system
