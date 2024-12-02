@@ -1,28 +1,62 @@
-# POC Autodocumentation
+# Data Platform POC Auto-Documentation
 
-This is a simple repository that aims to showcase the viability of using github wiki and github pages as data catalogs 
+This repository demonstrates an automated data documentation system using GitHub Wiki and GitHub Pages as data catalogs. It integrates AWS infrastructure, dbt for transformations, and Dagster for extraction/loading/orchestration and as a platform central tool
 
-## Virtual Env
-- Windows: `python -m venv venv` -> `.\venv\Scripts\activate`
-- Unix: `python -m  venv venv` -> `source venv/bin/activate`
+## Project Structure 
+```
+root/
+├── auto_documentation
+│   └── WIP           
+│       ├── WIP        
+│       ├── WIP    
+│       └── WIP
+├── dagster_poc/
+│   └── dagster_poc/            
+│       ├── assets.py          
+│       ├── resources.py       
+│       └── definitions.py  
+├── dbt_poc/
+│   ├── models/
+│   │   ├── base_models.sql
+│   │   └── report_models.sql
+│   ├── dbt_project.yml
+│   └── packages.yml
+└── README.md
+```
 
-## AWS Setup
-
-- Created new AWS root account using work email
-- Created IAM User
-    - User details
-    - Permissions Options: Attach policies directly
-        - AmazonRDSFullAccess
-        - AmazonS3FullAccess
-        - IAMUserChangePassword
-- Created access key
-    - Local code
-    - Description tag
-- Setup AWS CLI on Windows
-- Use IAM user on AWS CLI using `aws configure`
-- Spun up S3 bucket using aws cli: `aws s3 mb s3://bucket-ame --region us-east-1`
-- Spun up RDS Postgres using aws cli:
+## Setup
+### Virtual Environment
 ```bash
+# Windows
+python -m venv venv
+.\venv\Scripts\activate
+
+# Unix
+python -m venv venv
+source venv/bin/activate
+```
+
+### AWS Infrastructure setup
+Account Setup
+- Create AWS root acc w/ work email
+- Create IAM user w/ following permissions:
+    - AmazonRDSFullAccess
+    - AmazonS3FullAccess
+    - IAMUserChangePassword
+    - AmazonEC2FullAccess
+- Generate Acces Key for local development
+
+AWS CLI Configuration
+```bash
+aws configure # Use IAM user credentials
+```
+
+Resource Creation
+```bash
+# Create S3 bucket
+aws s3 mb s3://bucket-name --region us-east-1
+
+# Create RDS PostgreSQL instance
 aws rds create-db-instance `
     --db-instance-identifier "db-name" `
     --db-instance-class "db.t3.micro" `
@@ -33,24 +67,182 @@ aws rds create-db-instance `
     --publicly-accessible `
     --port 5432
 ```
-- Get IP address: `Invoke-RestMethod ifconfig.me/ip`
-- Authorize access to IP via security group:
-```
+
+Security Configuration
+```bash
+# Get IP Address
+Invoke-RestMethod ifconfig.me/ip
+
+# Configure Security Group
 aws ec2 authorize-security-group-ingress `
     --group-id sg-somestring `
     --protocol tcp `
     --port 5432 `
     --cidr "YOUR_IP_ADDRESS/32"
 ```
-- Can confirm this works using the `establish_db_connection()` function
+- You can confirm this works programatically and through a platform like pgAdmin4
 
-## DBT Setup
-- Ran `dbt init` and went through process of supplying info for `profiles.yml` in `C:\Users\gioab\.dbt` folder 
-    - Probably can pass args to this to avoid the whole setup process manually
-- Ran `dbt debug` in dir to validate connection 
-- Edited `profiles.yml` to fix dev and prod details for dbt_poc
+### DBT Setup
+Initial Configuration
+```bash
+dbt init
+```
+- Creates profiles.yml in `~/.dbt/`
+- Run `dbt debug` to validation connection
+- Modify `profiles.yaml` to setup `dev` and `prod`
 
-## Dagster Setup
-- Ran `dagster project scaffold --name dagster_poc`
-- Updated dependencies in `pyproject.toml`
-- Ran `pip install -e ".[dev]"` and updated `.gitignore`
+Project Dependencies (Optional): Add following to `packages.yaml`
+```yaml
+packages:
+  - package: dbt-labs/audit_helper
+    version: 0.10.0
+  - package: dbt-labs/dbt_utils
+    version: 1.1.1
+  - package: dbt-labs/codegen
+    version: 0.12.1
+```
+
+Data Models
+- Source: `public.events_table`  
+- Base Model: `dbt.base_events`
+- Report Models:
+    - `dbt.marketing_report`
+    - `dbt.finance_report`
+
+### Dagster Setup
+Project Creation
+```bash
+dagster project scaffod --name dagster_poc
+```
+
+Dagster Dependency Management
+- Done via pyproject.toml to be in line with modern best practices
+```toml
+[project]
+name = "dagster_poc"
+version = "0.1.0"
+description = "Were using dagster 1.9 so dependencies will be handled here"
+readme = "README.md"
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "dagster==1.9",
+    "dagster-cloud",
+    "dagster-aws",
+    "dagster-dbt",
+    "dagster-postgres",
+    "boto3",
+    "pandas",
+    "psycopg2-binary",
+    "sqlalchemy",
+    "python-dotenv"
+]
+
+[project.optional-dependencies]
+dev = [
+    "dagster-webserver", 
+    "pytest",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.dagster]
+module_name = "dagster_poc.definitions"
+code_location_name = "dagster_poc"
+```
+
+Install Development Dependencies
+```bash
+pip install -e ".[dev]"
+```
+
+## Data Pipeline Integration
+### Events Table
+- Generated and populated entirey via Dagster using S3 and RDS
+
+### DBT Models Configuration
+- Profiles point at either `dev` or `prod`
+- All models are just views
+
+```yaml
+# profiles.yaml
+dbt_poc:
+  outputs:
+    dev:
+      dbname: some_dbname
+      host: some_host
+      pass: some_pass
+      port: some_port
+      schema: some_schema
+      threads: some_thread
+      type: postgres
+      user: some_user
+    prod:
+        # same as above
+  target: prod
+
+# dbt_project.yaml
+models:
+  dbt_poc:
+    +materialized: view
+```
+
+### Dagster-DBT Integration
+Loading DBT models as Dagster Assets
+- Point to the DBT Project and turn it into an object
+- Associate DBT Project object with DBT Resource
+- Use DBT Project object with DBT assets decorator to load all models as assets
+
+```python
+# resources.py
+from pathlib import Path
+from dagster_dbt import DbtCliResource, DbtProject
+
+DBT_PROJECT_DIR = Path(__file__).parent.parent.parent / "dbt_poc"
+DBT_PROFILES_DIR = Path.home() / ".dbt"
+
+dbt_project = DbtProject(
+    project_dir=str(DBT_PROJECT_DIR)
+)
+
+dbt_resource = DbtCliResource(
+    project_dir=dbt_project,
+    profiles_dir=str(DBT_PROFILES_DIR)
+)
+
+# assets.py
+@dbt_assets(
+    manifest=dbt_project.manifest_path,
+)
+def dbt_project_assets(context: AssetExecutionContext, dbt: DbtCliResource):
+    yield from dbt.cli(["build"], context=context).stream()
+```
+
+
+Upstream Dependencies
+- Need to associate proper metadata to pure dagster upstream assets in  `sources.yaml`
+```yaml
+# sources.yml
+sources:
+  - name: dagster
+    schema: public
+    tables:
+      - name: events_table
+        description: Raw platform transactions data from daily CSV loads
+        meta:
+          dagster:
+            asset_key: ["events_table"]
+        columns:
+          - name: event_id
+            description: Unique identifier for each event
+``` 
+
+## Development Tools
+- DBT Power User (VS Code Extension)
+- AWS CLI
+- Dagster UI for debugging
+
+## Next Steps
+- Deploy DBT Docs Site to GitHub Pages
+- Deploy DBT tabular format catalog to GitHub Wiki
