@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, text, Engine
 from sqlalchemy.exc import SQLAlchemyError
 from urllib.parse import quote_plus
 
-from logger_config import setup_logger
+from .logger_config import setup_logger
 
 load_dotenv()
 
