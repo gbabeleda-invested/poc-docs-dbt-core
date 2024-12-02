@@ -1,0 +1,31 @@
+[project]
+name = "dagster_poc"
+version = "0.1.0"
+description = "Were using dagster 1.9 so dependencies will be handled here"
+readme = "README.md"
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "dagster==1.9",
+    "dagster-cloud",
+    "dagster-aws",
+    "dagster-dbt",
+    "boto3",
+    "pandas",
+    "psycopg2-binary",
+    "sqlalchemy",
+    "python-dotenv"
+]
+
+[project.optional-dependencies]
+dev = [
+    "dagster-webserver", 
+    "pytest",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.dagster]
+module_name = "dagster_poc.definitions"
+code_location_name = "dagster_poc"
