@@ -45,3 +45,6 @@ aws ec2 authorize-security-group-ingress `
 - Can confirm this works using the `establish_db_connection()` function
 
 ## DBT Setup
+- Ran `dbt init` and went through process of supplying info for `profiles.yml` in `C:\Users\gioab\.dbt` folder 
+- Ran `dbt debug` in dir to validate connection 
+- Edited `profiles.yml` to fix dev and prod details for dbt_poc
