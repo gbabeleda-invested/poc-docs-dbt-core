@@ -15,7 +15,7 @@ with
             client_country,
             transaction_date
 
-        from {{ source('platform_data', 'events_table') }}
+        from {{ source('dagster', 'events_table') }}
 
     )
 
