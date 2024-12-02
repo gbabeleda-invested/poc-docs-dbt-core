@@ -9,6 +9,7 @@ dependencies = [
     "dagster-cloud",
     "dagster-aws",
     "dagster-dbt",
+    "dagster-postgres",
     "boto3",
     "pandas",
     "psycopg2-binary",
