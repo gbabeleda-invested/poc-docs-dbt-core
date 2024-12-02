@@ -1,11 +1,14 @@
 version: 2
 
 sources:
-  - name: platform_data
+  - name: dagster
     schema: public
     tables:
       - name: events_table
         description: Raw platform transactions data from daily CSV loads
+        meta:
+          dagster:
+            asset_key: ["events_table"]
         columns:
           - name: transaction_id
             description: Unique identifier for each transaction
