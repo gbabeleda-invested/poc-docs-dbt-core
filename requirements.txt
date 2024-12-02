@@ -1,4 +1,5 @@
 dagster==1.9
+# Do we even need these here and not in the pyproject.toml?
 dagster-dbt
 dagster-aws
 

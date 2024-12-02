@@ -46,5 +46,11 @@ aws ec2 authorize-security-group-ingress `
 
 ## DBT Setup
 - Ran `dbt init` and went through process of supplying info for `profiles.yml` in `C:\Users\gioab\.dbt` folder 
+    - Probably can pass args to this to avoid the whole setup process manually
 - Ran `dbt debug` in dir to validate connection 
 - Edited `profiles.yml` to fix dev and prod details for dbt_poc
+
+## Dagster Setup
+- Ran `dagster project scaffold --name dagster_poc`
+- Updated dependencies in `pyproject.toml`
+- Ran `pip install -e ".[dev]"` and updated `.gitignore`

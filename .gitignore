@@ -1,11 +1,27 @@
-venv/
+# Environment
 *.env
-.DS_Store
-**/.DS_Store
+venv/
 
+# Dumps
 creds/
 data_dump/
 
-__pycache__
+# Python
+__pycache__/
+*.egg-info/
+*.egg
 
+# IDE
+.vscode/
+
+# Logs
+logs/
 *.log
+
+# Dagster
+dagster_home/
+
+
+# Other
+.DS_Store
+**/.DS_Store
