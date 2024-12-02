@@ -1,2 +1,11 @@
 venv/
 *.env
+.DS_Store
+**/.DS_Store
+
+creds/
+data_dump/
+
+__pycache__
+
+*.log
