@@ -1,14 +1,17 @@
 import os
 from dotenv import load_dotenv
-from datetime import datetime, date
-from dagster import asset, EnvVar, OpExecutionContext
-from dagster_aws.s3 import S3Resource
+from datetime import date
+
 import pandas as pd
 
-from .resources import poc_s3_resource
+from dagster import asset, AssetExecutionContext
+from dagster_aws.s3 import S3Resource
+from dagster_dbt import DbtCliResource, dbt_assets
+
+from .resources import poc_s3_resource, dbt_project
 from .database_functions import establish_db_connection, text
 
-load_dotenv
+load_dotenv()
 
 bucket_name = "gio-poc-docs-bucket"
 test_csv = "platform_transactions.csv"
@@ -18,7 +21,7 @@ table = "events_table"
 
 @asset
 def daily_platform_transactions(
-    context: OpExecutionContext, 
+    context: AssetExecutionContext, 
     s3: S3Resource = poc_s3_resource
 ) -> pd.DataFrame:
     """
@@ -41,7 +44,7 @@ def daily_platform_transactions(
 
 @asset() # dont use deps here because we insert as parameter
 def events_table(
-    context: OpExecutionContext,
+    context: AssetExecutionContext,
     daily_platform_transactions: pd.DataFrame
 ) -> None:
     """
@@ -83,7 +86,7 @@ def events_table(
                 name=table,
                 schema=schema,
                 con=conn,
-                if_exists="replace",
+                if_exists="append",
                 index=False
             )
 
@@ -93,3 +96,12 @@ def events_table(
     except Exception as e:
         context.log.error(f"Something went wrong with creating/uploading to events table: {str(e)}")
         raise
+
+@dbt_assets(
+        manifest=dbt_project.manifest_path,
+)
+def dbt_project_assets(
+    context: AssetExecutionContext,
+    dbt: DbtCliResource
+):
+    yield from dbt.cli(["build"], context=context).stream()
