@@ -56,10 +56,11 @@ jobs:
     - name: Copy docs to docs directory
       run: |
         rm -rf docs/*
-        cp dbt_poc/target/catalog.json docs/
-        cp dbt_poc/target/manifest.json docs/
-        cp dbt_poc/target/graph.gpickle docs/
-        cp dbt_poc/target/index.html docs/
+        ls -la dbt_poc/target/
+        cp -f dbt_poc/target/catalog.json docs/
+        cp -f dbt_poc/target/manifest.json docs/
+        cp -f dbt_poc/target/graph.gpickle docs/
+        cp -f dbt_poc/target/index.html docs/
         
     - name: Commit and push if changes
       run: |
