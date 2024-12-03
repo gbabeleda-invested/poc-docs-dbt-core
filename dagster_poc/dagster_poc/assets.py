@@ -1,6 +1,8 @@
 import os
 from dotenv import load_dotenv
 from datetime import date
+from pathlib import Path
+import sys
 
 import pandas as pd
 
@@ -8,10 +10,15 @@ from dagster import asset, AssetExecutionContext
 from dagster_aws.s3 import S3Resource
 from dagster_dbt import DbtCliResource, dbt_assets
 
+# Add utilities to Python path
+root_dir = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(root_dir))  # Insert at beginning of path
+
+from utilities.database_functions import establish_db_connection, text
 from .resources import poc_s3_resource, dbt_project
-from .database_functions import establish_db_connection, text
 
 load_dotenv()
+
 
 bucket_name = "gio-poc-docs-bucket"
 test_csv = "platform_transactions.csv"

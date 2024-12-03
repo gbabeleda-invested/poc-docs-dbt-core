@@ -169,12 +169,12 @@ Data Models
     - `dbt.finance_report`
 
 ### Dagster Setup
-Project Creation
+**Project Creation**
 ```bash
 dagster project scaffod --name dagster_poc
 ```
 
-Dagster Dependency Management
+**Dagster Dependency Management**
 - Done via pyproject.toml to be in line with modern best practices
 ```toml
 [project]
@@ -211,9 +211,24 @@ module_name = "dagster_poc.definitions"
 code_location_name = "dagster_poc"
 ```
 
-Install Development Dependencies
+**Install Development Dependencies**
 ```bash
 pip install -e ".[dev]"
+```
+
+**Working with External Resources**
+- Dagster projects often need to work with files and modules outside the main dagster dir.
+Here are common patterns for managing these external dependencies:
+
+Importing Utility functions
+```python
+from pathlib import Path
+import sys
+
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+from utilities.database_functions import establish_db_connection 
 ```
 
 ## Data Pipeline Integration
