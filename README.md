@@ -70,7 +70,12 @@ Configure GitHub Pages
 
 ### Generate DBT Documentation automatically via GitHub Actions
 
-WIP
+Facing some issue w/ Security Group stuff for AWS during `dbt debug`. Opening up RDS to all traffic temporarily.
+
+In production for `dataops` need to add
+- `SSH_PRIVATE_KEY`
+- `SSH_HOST`
+- `SSH_USER`
 
 ## Data Warehouse
 
