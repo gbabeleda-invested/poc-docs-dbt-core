@@ -48,6 +48,7 @@ jobs:
     - name: Generate DBT docs
       run: |
         cd dbt_poc
+        dbt deps
         dbt docs generate
         
     - name: Copy docs to docs directory
