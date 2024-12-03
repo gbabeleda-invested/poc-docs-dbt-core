@@ -1,4 +1,4 @@
-name: Test DBT Setup
+name: Generate and Deploy DBT Docs
 on:
   push:
     branches: [ main ]
@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test-setup:
+  generate-and-deploy-docs:
     runs-on: ubuntu-latest
     
     steps:
@@ -39,8 +39,29 @@ jobs:
               threads: 4
           target: prod
         EOF
-    
+
     - name: Run DBT Debug
       run: |
         cd dbt_poc
         dbt debug
+    
+    - name: Generate DBT docs
+      run: |
+        cd dbt_poc
+        dbt docs generate
+        
+    - name: Copy docs to docs directory
+      run: |
+        rm -rf docs/*
+        cp dbt_poc/target/catalog.json docs/
+        cp dbt_poc/target/manifest.json docs/
+        cp dbt_poc/target/graph.gpickle docs/
+        cp dbt_poc/target/index.html docs/
+        
+    - name: Commit and push if changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add docs/
+        git commit -m "Auto-update DBT documentation" || echo "No changes to commit"
+        git push
