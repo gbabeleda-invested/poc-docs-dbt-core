@@ -25,16 +25,16 @@ jobs:
     - name: Create DBT profiles
       run: |
         mkdir -p ~/.dbt
-        cat << EOF > ~/.dbt/profiles.yml
+        cat > ~/.dbt/profiles.yml << 'EOF'
         dbt_poc:
           outputs:
             prod:
               type: postgres
-              host: \${{ secrets.DBT_HOST }}
-              port: \${{ secrets.DBT_PORT }}
-              user: \${{ secrets.DBT_USER }}
-              pass: \${{ secrets.DBT_PASSWORD }}
-              dbname: \${{ secrets.DBT_DBNAME }}
+              host: ${{ secrets.DBT_HOST }}
+              port: ${{ secrets.DBT_PORT | number }}
+              user: ${{ secrets.DBT_USER }}
+              pass: ${{ secrets.DBT_PASSWORD }}
+              dbname: ${{ secrets.DBT_DBNAME }}
               schema: dbt
               threads: 4
           target: prod
