@@ -31,7 +31,7 @@ jobs:
             prod:
               type: postgres
               host: ${{ secrets.DBT_HOST }}
-              port: ${{ secrets.DBT_PORT | number }}
+              port: 5432
               user: ${{ secrets.DBT_USER }}
               pass: ${{ secrets.DBT_PASSWORD }}
               dbname: ${{ secrets.DBT_DBNAME }}
