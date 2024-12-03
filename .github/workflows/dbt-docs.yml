@@ -1,0 +1,23 @@
+name: Test DBT Docs Setup
+on:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main]
+    
+jobs:
+    test-setup:
+        runs-on: ubuntu-latest
+
+        steps:
+        - uses: actions/checkout@v3
+
+
+        - name: Test Access to Secrets
+        run: |
+            if [ "${{ secrets.DBT_HOST }}" != "" ]; then
+            echo "Successfully accessed DBT_HOST secret"
+            else
+            echo "Failed to access DBT_HOST secret"
+            exit 1
+            fi
