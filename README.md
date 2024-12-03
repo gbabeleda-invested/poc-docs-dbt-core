@@ -2,29 +2,83 @@
 
 This repository demonstrates an automated data documentation system using GitHub Wiki and GitHub Pages as data catalogs. It integrates AWS infrastructure, dbt for transformations, and Dagster for extraction/loading/orchestration and as a platform central tool
 
-## Project Structure 
+### [DBT Doc Site](https://gbabeleda-invested.github.io/poc-docs-dbt-core/#!/overview)
+
+### Next Steps
+- Automate DBT Docs site -> GitHub Pages via GitHub Actions
+- Do a manual run of data warehouse documentation -> GitHub Wiki
+- Automate data warehouse documentation -> GitHub Wiki
+
+
+
+
+# Project Structure 
 ```
 root/
-├── auto_documentation
-│   └── WIP           
-│       ├── WIP        
-│       ├── WIP    
-│       └── WIP
+├── .nojekyll              # Prevents GitHub Pages from using Jekyll processing
+├── docs/                  # Generated DBT documentation
+│   ├── catalog.json       # DBT catalog information
+│   ├── graph.gpickle     # DAG visualization data
+│   ├── index.html        # Main documentation page
+│   └── manifest.json     # DBT manifest information
 ├── dagster_poc/
 │   └── dagster_poc/            
-│       ├── assets.py          
-│       ├── resources.py       
-│       └── definitions.py  
+│       ├── assets.py          # Dagster asset definitions
+│       ├── resources.py       # Resource configurations
+│       └── definitions.py     # Dagster job definitions
 ├── dbt_poc/
 │   ├── models/
-│   │   ├── base_models.sql
-│   │   └── report_models.sql
-│   ├── dbt_project.yml
-│   └── packages.yml
-└── README.md
+│   │   ├── base_models.sql    # Base dbt models
+│   │   └── report_models.sql  # Reporting dbt models
+│   ├── dbt_project.yml       # DBT project configuration
+│   └── packages.yml          # DBT package dependencies
+└── README.md                 # Project documentation
 ```
 
-## Setup
+# Documentation Setup
+## DBT
+### Generate DBT documentation locally
+
+```bash
+cd dbt_poc
+dbt docs generate
+```
+
+This creates the following files in the `target/` directory
+- `catalog.json`: Contains information about database objects
+- `manifest.json`: Contains information about your DBT project
+- `graph.gpickle`: Contains DAG visualization data
+- `index.html`: Main documentation interface
+
+Create GitHub Pages Directory
+```bash
+mkdir docs
+cp dbt_poc.target* docs/
+```
+
+Prevent Jekyll Processing
+```bash
+touch .nojekyll
+```
+
+Configure GitHub Pages
+- Go to repository Settings -> Pages
+- Set Source to "Deploy from a branch"
+- Select `main` branch
+- Set folder to `/docs`
+- Commit and push changes
+
+### Generate DBT Documentation automatically via GitHub Actions
+
+WIP
+
+## Data Warehouse
+
+WIP
+
+
+
+# Infrastructure and Development Setup
 ### Virtual Environment
 ```bash
 # Windows
@@ -242,7 +296,3 @@ sources:
 - DBT Power User (VS Code Extension)
 - AWS CLI
 - Dagster UI for debugging
-
-## Next Steps
-- Deploy DBT Docs Site to GitHub Pages
-- Deploy DBT tabular format catalog to GitHub Wiki
