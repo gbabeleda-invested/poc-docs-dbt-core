@@ -12,6 +12,8 @@ python-dotenv
 boto3
 pandas
 
+PyGithub
+
 black
 pylint
 mypy
