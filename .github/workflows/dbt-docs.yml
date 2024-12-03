@@ -1,4 +1,4 @@
-name: Test DBT Docs Setup
+name: Test DBT Setup
 on:
   push:
     branches: [ main ]
@@ -12,11 +12,35 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Test Access to Secrets
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
       run: |
-        if [ "${{ secrets.DBT_HOST }}" != "" ]; then
-          echo "Successfully accessed DBT_HOST secret"
-        else
-          echo "Failed to access DBT_HOST secret"
-          exit 1
-        fi
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create DBT profiles
+      run: |
+        mkdir -p ~/.dbt
+        cat << EOF > ~/.dbt/profiles.yml
+        dbt_poc:
+          outputs:
+            prod:
+              type: postgres
+              host: \${{ secrets.DBT_HOST }}
+              port: \${{ secrets.DBT_PORT }}
+              user: \${{ secrets.DBT_USER }}
+              pass: \${{ secrets.DBT_PASSWORD }}
+              dbname: \${{ secrets.DBT_DATABASE }}
+              schema: dbt
+              threads: 4
+          target: prod
+        EOF
+    
+    - name: Run DBT Debug
+      run: |
+        cd dbt_poc
+        dbt debug
