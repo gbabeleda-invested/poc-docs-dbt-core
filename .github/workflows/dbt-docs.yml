@@ -34,7 +34,7 @@ jobs:
               port: \${{ secrets.DBT_PORT }}
               user: \${{ secrets.DBT_USER }}
               pass: \${{ secrets.DBT_PASSWORD }}
-              dbname: \${{ secrets.DBT_DATABASE }}
+              dbname: \${{ secrets.DBT_DBNAME }}
               schema: dbt
               threads: 4
           target: prod
