@@ -39,7 +39,11 @@ jobs:
       - name: Checkout wiki repository
         run: |
           git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" wiki
-
+          cd wiki
+          # Remove all files except .git directory
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+          cd ..
+          
       - name: Copy generated docs to wiki
         run: |
           cp -r catalog_docs/* wiki/
