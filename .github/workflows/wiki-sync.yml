@@ -34,7 +34,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DBT_PASSWORD }}
           DB_PORT: ${{ secrets.DBT_PORT }}
         run: |
-          data_catalog/data_catalog.py
+          python3 data_catalog/data_catalog.py
 
       - name: Checkout wiki repository
         run: |
