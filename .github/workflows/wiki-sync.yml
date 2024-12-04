@@ -1,0 +1,57 @@
+name: Generate and Sync Wiki
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sync-wiki:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          pyton-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate markdown files
+        env:
+          DB_HOST: ${{ secrets.DBT_HOST }}
+          DB_NAME: ${{ secrets.DBT_DBNAME }}
+          DB_USER: ${{ secrets.DBT_USER }}
+          DB_PASSWORD: ${{ secrets.DBT_PASSWORD }}
+          DB_PORT: ${{ secrets.DBT_PORT }}
+        run: |
+          data_catalog/data_catalog.py
+
+      - name: Checkout wiki repository
+        run: |
+          git clone "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" wiki
+
+      - name: Copy generated docs to wiki
+        run: |
+          cp -r catalog_docs/* wiki/
+          cd wiki
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add . 
+          git diff --quiet && git diff --staged --quiet || git commit -m "docs: sync data catalog documentation to wiki"
+          git push
+
+      - name: Cleanup
+        if: always()
+        run: | 
+          rm -rf wiki
+
