@@ -173,28 +173,29 @@ def generate_home_page(high_level_types: list, detail_types: list) -> str:
     """
     content = """# Data Catalog Documentation
 
-    Welcome to the Data Catalog! This wiki contains automatically generated documentation about our data warehouse objects.
+Welcome to the Data Catalog! This wiki contains automatically generated documentation about our data warehouse objects.
 
-    ## Available Documentation
+## Available Documentation
 
-    ### High Level Overviews
-    """
+## High Level Overviews
+"""
     
     # Add links to high-level docs
     for obj_type in high_level_types:
-        content += f"* [{obj_type.replace('_', ' ').title()} Overview]({obj_type}_overview)\n"
+        display_name = obj_type.replace('_', ' ').title()
+        content += f"* [{display_name}]({obj_type}_overview)\n"
     
-    content += "\n### Detailed Documentation\n"
+    content += "\n## Detailed Documentation\n"
     
     # Add links to detailed docs
     for obj_type in detail_types:
-        content += f"* [{obj_type.replace('_', ' ').title()} Details]({obj_type}_details)\n"
+        display_name = obj_type.replace('_', ' ').title()
+        content += f"* [{display_name}]({obj_type}_details)\n"
     
     content += """
-    ## Documentation Updates
-    This documentation is automatically generated and updated whenever changes are pushed to the main branch.
-    """
-
+## Documentation Updates
+This documentation is automatically generated and updated whenever changes are pushed to the main branch.
+"""
     return content
 
 if __name__ == "__main__":
