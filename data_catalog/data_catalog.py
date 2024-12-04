@@ -129,7 +129,7 @@ def format_for_markdown(df: pd.DataFrame, object_type: str, query_type: str = "h
     return content
 
 
-def save_to_file(content: str, filename: str, directory: str = "data_dump") -> None:
+def save_to_file(content: str, filename: str, directory: str = "catalog_docs") -> None:
     """
     Saves markdown content to a file in the data_dump directory at project root
     
@@ -153,18 +153,18 @@ def save_to_file(content: str, filename: str, directory: str = "data_dump") -> N
     logger.info(f"Written markdown content to {filepath}")
 
 
-
-def update_github_wiki(
-    gh_token: str,
-    repo_name: str,
-    page_name: str,
-    content: str 
-) -> None:
-    """
-    Updates or creates a GitHub wiki page
-    """
-    # TO DO: Implement Markdown formatting logic for each object type
-    pass
+# We will use GitHub Actions to do GitHub things instead of writing python for it
+# def update_github_wiki(
+#     gh_token: str,
+#     repo_name: str,
+#     page_name: str,
+#     content: str 
+# ) -> None:
+#     """
+#     Updates or creates a GitHub wiki page
+#     """
+#     # TO DO: Implement Markdown formatting logic for each object type
+#     pass
 
 
 
@@ -190,7 +190,8 @@ if __name__ == "__main__":
             df = get_db_metadata(engine, "details", obj_type)
             content = format_for_markdown(df, obj_type, "details")            
             save_to_file(content, f"{obj_type}_details")
-
+            
+        logger.info("Successfully generated all documentation files")
 
     except Exception as e:
         logger.error(f"Something went wrong in the data catalog function: {str(e)}")
