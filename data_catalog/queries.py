@@ -87,11 +87,9 @@ HIGH_LEVEL_QUERIES = {
         on p.pronamespace = n.oid
     join pg_catalog.pg_roles r 
         on p.proowner = r.oid
-    left join pg_catalog.pg_extension e
-        on p.pronamespace = e.extnamespace
     where 
         n.nspname not in ('pg_catalog', 'information_schema')
-        and e.extname is null
+        and r.rolname != 'postgres'
     order by n.nspname, p.proname;
     """
 }
