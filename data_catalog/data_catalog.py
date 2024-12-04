@@ -167,7 +167,35 @@ def save_to_file(content: str, filename: str, directory: str = "catalog_docs") -
 #     pass
 
 
+def generate_home_page(high_level_types: list, detail_types: list) -> str:
+    """
+    Generates the content for the Home.md landing page
+    """
+    content = """# Data Catalog Documentation
 
+    Welcome to the Data Catalog! This wiki contains automatically generated documentation about our data warehouse objects.
+
+    ## Available Documentation
+
+    ### High Level Overviews
+    """
+    
+    # Add links to high-level docs
+    for obj_type in high_level_types:
+        content += f"* [{obj_type.replace('_', ' ').title()} Overview]({obj_type}_overview)\n"
+    
+    content += "\n### Detailed Documentation\n"
+    
+    # Add links to detailed docs
+    for obj_type in detail_types:
+        content += f"* [{obj_type.replace('_', ' ').title()} Details]({obj_type}_details)\n"
+    
+    content += """
+    ## Documentation Updates
+    This documentation is automatically generated and updated whenever changes are pushed to the main branch.
+    """
+
+    return content
 
 if __name__ == "__main__":
     setup_logger()
@@ -181,6 +209,13 @@ if __name__ == "__main__":
             port=os.getenv('DB_PORT')
         )        
 
+        # Generate and save the home page first
+        home_content = generate_home_page(
+            high_level_types=list(HIGH_LEVEL_QUERIES.keys()),
+            detail_types=list(DETAIL_QUERIES.keys())
+        )
+        save_to_file(home_content, "Home")  # This will create Home.md
+
         for obj_type in HIGH_LEVEL_QUERIES.keys():
             df = get_db_metadata(engine, "high_level", obj_type)
             content = format_for_markdown(df, obj_type, "high_level")
@@ -190,7 +225,7 @@ if __name__ == "__main__":
             df = get_db_metadata(engine, "details", obj_type)
             content = format_for_markdown(df, obj_type, "details")            
             save_to_file(content, f"{obj_type}_details")
-            
+
         logger.info("Successfully generated all documentation files")
 
     except Exception as e:
