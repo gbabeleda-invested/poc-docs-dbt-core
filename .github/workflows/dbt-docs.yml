@@ -69,3 +69,11 @@ jobs:
         git add docs/
         git commit -m "Auto-update DBT documentation" || echo "No changes to commit"
         git push
+
+  trigger-cloudflare-deploy:
+    needs: generate-and-deploy-docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare Pages deployment
+        run: |
+          curl -X POST "${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}"
