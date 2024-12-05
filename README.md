@@ -2,14 +2,12 @@
 
 This repository demonstrates an automated data documentation system using GitHub Wiki and GitHub Pages as data catalogs. It integrates AWS infrastructure, dbt for transformations, and Dagster for extraction/loading/orchestration and as a platform central tool
 
-### [DBT Doc Site](https://gbabeleda-invested.github.io/poc-docs-dbt-core/#!/overview)
+We have transitioned from GitHub Pages -> Cloudflare Pages due to private repo needs. 
+
+### [DBT Cloudflare Site]
 
 ### Next Steps
-- Automate DBT Docs site -> GitHub Pages via GitHub Actions
-- Do a manual run of data warehouse documentation -> GitHub Wiki
 - Automate data warehouse documentation -> GitHub Wiki
-
-
 
 
 # Project Structure 
@@ -50,27 +48,36 @@ This creates the following files in the `target/` directory
 - `graph.gpickle`: Contains DAG visualization data
 - `index.html`: Main documentation interface
 
-Create GitHub Pages Directory
+Create `docs` Directory
 ```bash
 mkdir docs
 cp dbt_poc.target* docs/
 ```
 
-Prevent Jekyll Processing
-```bash
-touch .nojekyll
-```
+### Cloudflare Pages Setup for DBT Docs
+1. Create Cloudflare account
+2. Setup Pages project
+  - Go to Workers & Pages -> Pages -> Connect to Git
+  - Install Cloudflare Workers and Pages -> Select Github Account -> Only select repositories
+  - Wait for administrator to respond/authorize 
+3. Configure build settings: 
+  - Buld command: `exit 0`
+  - Build output directory: `/docs`
+  - Root Directory: `/`
+  - Framework preset: None
+4. Configure deployment settings
+  - Disable automatic deployments
+  - Create deploy hook for GitHub actions integration in the cloudflare dashboard
+  - Add deploy hook URL as GitHub secret `CLOUDFLARE_DEPLOY_HOOK`
+5. GitHub Actions Integration 
+  - GitHub action generates DBT docs and commits to `docs/` folder
+  - Action triggers Cloudflare Pages deployment via webhook
+  - Pages builds and serves the documentation site
 
-Configure GitHub Pages
-- Go to repository Settings -> Pages
-- Set Source to "Deploy from a branch"
-- Select `main` branch
-- Set folder to `/docs`
-- Commit and push changes
 
-### Generate DBT Documentation automatically via GitHub Actions
-
-Facing some issue w/ Security Group stuff for AWS during `dbt debug`. Opening up RDS to all traffic temporarily.
+Notes: 
+- Facing some issue w/ Security Group stuff for AWS during `dbt debug`. Opening up RDS to all traffic temporarily.
+- Still needs to be updated to properly interact with security stuff
 
 In production for `dataops` need to add
 - `SSH_PRIVATE_KEY`
@@ -316,3 +323,27 @@ sources:
 - DBT Power User (VS Code Extension)
 - AWS CLI
 - Dagster UI for debugging
+
+
+## GitHub Pages Legacy Guide
+### Manual 
+Create GitHub Pages Directory
+```bash
+mkdir docs
+cp dbt_poc.target* docs/
+```
+
+Prevent Jekyll Processing
+```bash
+touch .nojekyll
+```
+
+Configure GitHub Pages
+- Go to repository Settings -> Pages
+- Set Source to "Deploy from a branch"
+- Select `main` branch
+- Set folder to `/docs`
+- Commit and push changes
+
+## Automated
+Github Pages runs every time the Github action is deployed, which is every push/pull request
