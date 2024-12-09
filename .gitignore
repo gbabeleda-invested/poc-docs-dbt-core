@@ -5,6 +5,7 @@ venv/
 # Dumps
 creds/
 data_dump/
+catalog_docs/
 
 # Python
 __pycache__/
