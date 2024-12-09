@@ -37,6 +37,24 @@ This documentation is automatically generated and updated whenever changes are p
 """
     return content
 
+def format_sql_for_markdown(sql: str) -> str:
+    """
+    Format SQL definition for better markdown display while preserving formatting
+    
+    Args:
+        sql: Raw SQL definition string
+        
+    Returns:
+        Formatted SQL string ready for markdown tables
+    """
+    # Escape pipes for markdown tables
+    sql = sql.replace('|', '\\|')
+    # Replace newlines with HTML line break
+    sql = sql.replace('\n', '<br>')
+    # Preserve indentation by replacing spaces with &nbsp;
+    sql = sql.replace('  ', '&nbsp;&nbsp;')
+    return sql
+
 def format_for_markdown(
     catalog_dataframe: pd.DataFrame,
     catalog_name: str
@@ -68,7 +86,8 @@ def format_for_markdown(
             for col, val in row.items():
                 if col.lower() == "definition":
                     # Format SQL definitions with line breaks and escape pipes
-                    formatted_val = f"<pre>{str(val).replace('\n', '<br>').replace('|', '\\|')}</pre>"
+                    # formatted_val = f"<pre>{str(val).replace('\n', '<br>').replace('|', '\\|')}</pre>"
+                    formatted_val = format_sql_for_markdown(str(val))
                 else:
                     formatted_val = str(val)
                 formatted_values.append(formatted_val)
@@ -81,3 +100,4 @@ def format_for_markdown(
     except Exception as e:
         logger.error(f"Something went wrong formatting {catalog_name} to markdown: {str(e)}")
         raise
+
