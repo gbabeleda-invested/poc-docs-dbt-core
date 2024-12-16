@@ -1,13 +1,16 @@
 name: Generate and Deploy DBT Docs
+
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   generate-and-deploy-docs:
     runs-on: ubuntu-latest
+    environment: Production
     permissions:
       contents: write
     
@@ -23,35 +26,61 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        sudo apt-get install -y openssh-client
 
-    - name: Create DBT profiles
+    - name: Setup SSH key
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      run: | 
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H $BASTION_HOST >> ~/.ssh/known_hosts
+
+    - name: Setup SSH tunnel to bastion server
+      env:
+        BASTION_HOST: ${{ vars.BASTION_HOST }}
+        BASTION_USER: ${{ vars.BASTION_USER }}
+        DB_HOST: ${{ vars.DB_HOST }}
+      run: |
+        ssh -N -L 5432:$DB_HOST:5432 $BASTION_USER@$BASTION_HOST -f
+        # Add health check to ensure tunnel is up
+        sleep 5
+        nc -zv localhost 5432
+
+    - name: Set DBT Profiles
+      env: 
+        DB_NAME: ${{ vars.DB_NAME }}
+        DB_USER: ${{ vars.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       run: |
         mkdir -p ~/.dbt
-        cat > ~/.dbt/profiles.yml << 'EOF'
+        cat << EOF > ~/.dbt/profiles.yml
         dbt_poc:
           outputs:
             prod:
               type: postgres
-              host: ${{ secrets.DBT_HOST }}
+              dbname: $DB_NAME
+              host: localhost
+              user: $DB_USER
+              pass: $DB_PASSWORD
               port: 5432
-              user: ${{ secrets.DBT_USER }}
-              pass: ${{ secrets.DBT_PASSWORD }}
-              dbname: ${{ secrets.DBT_DBNAME }}
               schema: dbt
               threads: 4
           target: prod
         EOF
+        test -f ~/.dbt/profiles.yml || exit 1
 
     - name: Run DBT Debug
       run: |
         cd dbt_poc
-        dbt debug
+        dbt debug --profiles-dir ~/.dbt
     
     - name: Generate DBT docs
       run: |
         cd dbt_poc
-        dbt deps
-        dbt docs generate
+        dbt deps --profiles-dir ~/.dbt
+        dbt docs generate --profiles-dir ~/.dbt
         
     - name: Copy docs to docs directory
       run: |
