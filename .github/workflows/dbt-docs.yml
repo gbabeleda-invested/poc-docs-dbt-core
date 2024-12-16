@@ -36,7 +36,10 @@ jobs:
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H $BASTION_HOST >> ~/.ssh/known_hosts
+        echo "Running keyscan for host: $BASTION_HOST"
+        ssh-keyscan -v -H "$BASTION_HOST" 2>&1  # Added -v for verbose output and showing stderr
+        ssh-keyscan -v -H "$BASTION_HOST" >> ~/.ssh/known_hosts || echo "Keyscan failed but continuing"
+        cat ~/.ssh/known_hosts  # Let's see what got written
 
     - name: Setup SSH tunnel to bastion server
       env:

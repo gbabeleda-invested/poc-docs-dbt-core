@@ -1,8 +1,7 @@
 name: Generate and Sync Wiki
 
 on:
-  push:
-    branches: [ main ]
+
   pull_request:
     branches: [ main ]
 
