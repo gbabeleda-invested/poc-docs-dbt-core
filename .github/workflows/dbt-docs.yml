@@ -46,10 +46,20 @@ jobs:
         DB_HOST: ${{ vars.DB_HOST }}
       run: |
         ssh -N -L 5432:$DB_HOST:5432 $BASTION_USER@$BASTION_HOST &
-        # Added GH-actions IPs to AWS security group
-        # Add health check to ensure tunnel is up
-        sleep 5
-        nc -zv localhost 5432
+        echo $! > ssh.pid
+        
+        # Give the tunnel time to establish and retry nc check a few times
+        for i in {1..5}; do
+          echo "Attempt $i: Checking if tunnel is up..."
+          sleep 5
+          if nc -z localhost 5432; then
+            echo "Tunnel established successfully"
+            exit 0
+          fi
+        done
+        
+        echo "Failed to establish tunnel after 5 attempts"
+        exit 1
 
     - name: Set DBT Profiles
       env: 
