@@ -46,6 +46,7 @@ jobs:
         DB_HOST: ${{ vars.DB_HOST }}
       run: |
         ssh -N -L 5432:$DB_HOST:5432 $BASTION_USER@$BASTION_HOST -f
+        # Added GH-actions IPs to AWS security group
         # Add health check to ensure tunnel is up
         sleep 5
         nc -zv localhost 5432
