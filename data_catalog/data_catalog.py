@@ -5,11 +5,12 @@ from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
+from sqlalchemy import Engine, text
 
 root_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(root_dir))
 
-from utilities.database_functions import establish_db_connection, text, Engine
+from utilities.database_functions import establish_db_connection
 from utilities.logger_config import setup_logger
 from data_catalog.queries import query_dict
 from data_catalog.markdown_functions import generate_home_page, format_for_markdown
@@ -72,16 +73,20 @@ def save_to_file(content: str, filename: str, directory: str = "catalog_docs") -
 
 
 if __name__ == "__main__":
-    setup_logger()
 
     try:
-        engine = establish_db_connection(
+        setup_logger()
+        engine, tunnel = establish_db_connection(
             host=os.getenv('DB_HOST'),
             database=os.getenv('DB_NAME'),
             user=os.getenv('DB_USER'),
             password=os.getenv('DB_PASSWORD'),
-            port=os.getenv('DB_PORT')
-        )        
+            use_ssh=True,
+            ssh_host=os.getenv('BASTION_HOST'),
+            ssh_username=os.getenv('BASTION_USER'),
+            ssh_private_key=os.getenv('SSH_PRIVATE_KEY'),
+            remote_host=os.getenv('DB_HOST')
+        )         
 
         # Generate Home Page
         home_content = generate_home_page(query_dict)
@@ -103,3 +108,9 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Something went wrong in the data catalog function: {str(e)}")
         sys.exit(1)
+
+    finally:
+        if engine:
+            engine.dispose()
+        if tunnel:
+            tunnel.close()

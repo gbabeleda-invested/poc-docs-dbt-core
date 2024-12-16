@@ -1,0 +1,21 @@
+dbt_poc:
+  outputs:
+    dev:
+      type: postgres
+      dbname: "{{ env_var('DB_NAME')}}"
+      host: "{{ env_var('DB_HOST')}}"
+      user: "{{ env_var('DB_USER')}}"
+      pass: "{{ env_var('DB_PASSWORD')}}"
+      port: 5432
+      schema: dbt_dev
+      threads: 4
+    prod:
+      type: postgres
+      dbname: "{{ env_var('DB_NAME')}}"
+      host: localhost
+      user: "{{ env_var('DB_USER')}}"
+      pass: "{{ env_var('DB_PASSWORD')}}"
+      port: 5432
+      schema: dbt # Production schema
+      threads: 4
+  target: prod

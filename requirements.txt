@@ -3,7 +3,6 @@ dagster==1.9
 dagster-dbt
 dagster-aws
 
-
 dbt-core==1.8
 dbt-postgres
 sqlalchemy
@@ -12,7 +11,8 @@ python-dotenv
 boto3
 pandas
 
-PyGithub
+sshtunnel
+paramiko
 
 black
 pylint

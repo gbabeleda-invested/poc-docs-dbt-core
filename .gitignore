@@ -22,6 +22,8 @@ logs/
 # Dagster
 dagster_home/
 
+# DBT
+.*.yml
 
 # Other
 .DS_Store
