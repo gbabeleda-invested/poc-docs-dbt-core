@@ -31,6 +31,7 @@ jobs:
     - name: Setup SSH key
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        BASTION_HOST: ${{ vars.BASTION_HOST }}
       run: | 
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
