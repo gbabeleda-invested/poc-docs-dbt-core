@@ -1,13 +1,16 @@
 name: Generate and Sync Wiki
 
 on:
-
+  push:
+    branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   sync-wiki:
     runs-on: ubuntu-latest
+    environment: Production
     permissions:
       contents: write
 
@@ -24,14 +27,27 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          sudo apt-get install -y openssh-client
+
+      - name: Setup SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: | 
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          # Just disable strict host checking instead of using keyscan
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
 
       - name: Generate markdown files
         env:
-          DB_HOST: ${{ secrets.DBT_HOST }}
-          DB_NAME: ${{ secrets.DBT_DBNAME }}
-          DB_USER: ${{ secrets.DBT_USER }}
-          DB_PASSWORD: ${{ secrets.DBT_PASSWORD }}
-          DB_PORT: ${{ secrets.DBT_PORT }}
+          DB_HOST: ${{ vars.DB_HOST }}
+          DB_NAME: ${{ vars.DB_NAME }}
+          DB_USER: ${{ vars.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          BASTION_HOST: ${{ vars.BASTION_HOST }}
+          BASTION_USER: ${{ vars.BASTION_USER }}
+          SSH_PRIVATE_KEY: ~/.ssh/id_rsa
         run: |
           python3 data_catalog/data_catalog.py
 
